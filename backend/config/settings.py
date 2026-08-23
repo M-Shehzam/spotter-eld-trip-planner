@@ -163,10 +163,10 @@ OSRM_FALLBACK_URL = os.getenv("OSRM_FALLBACK_URL", "")
 ROUTING_TIMEOUT_SECONDS = env_float("ROUTING_TIMEOUT_SECONDS", 20.0)
 ROUTING_RETRIES = env_int("ROUTING_RETRIES", 2)
 
-# OSRM's demo profile is a car. Multiplying its duration brings a typical
-# interstate run to roughly 55-58 mph average, which is what a dispatcher
-# would plan a Class 8 truck at.
-TRUCK_SPEED_FACTOR = env_float("TRUCK_SPEED_FACTOR", 1.15)
+# Scales the routing provider's duration into planned truck driving time.
+# OSRM's demo profile already implies 48-58 mph over a long haul, which is
+# the band a dispatcher plans a Class 8 truck at, so the default is 1.0.
+TRUCK_SPEED_FACTOR = env_float("TRUCK_SPEED_FACTOR", 1.0)
 
 # Hours of service, 49 CFR 395.3, property-carrying driver.
 HOS_DRIVING_LIMIT_HOURS = env_float("HOS_DRIVING_LIMIT_HOURS", 11.0)

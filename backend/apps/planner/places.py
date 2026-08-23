@@ -1,10 +1,10 @@
 """Turn what a driver types into coordinates, and coordinates back into a name.
 
-Everything here runs against ``data/us_places.csv``, a gazetteer of 27,093 US
-populated places committed to the repository. Nothing in this module makes a
-network call, which matters for three reasons: the autocomplete has to answer
-on every keystroke, the planner names a dozen stops per trip, and a public
-geocoder would rate-limit both.
+Everything here runs against ``data/us_places.csv``, a gazetteer of 30,935 US
+populated places committed to the repository and rebuildable with the
+``build_places`` command. Nothing here makes a network call, which matters for
+three reasons: the autocomplete has to answer on every keystroke, the planner
+names a dozen stops per trip, and a public geocoder would rate-limit both.
 
 Three operations:
 
@@ -95,6 +95,12 @@ US_BOUNDS = (18.0, 72.0, -180.0, -64.0)
 # stop is from a named place.
 GRID_DEGREES = 1.0
 
+# How much extra distance the reverse lookup will trade for a name people
+# recognise. Fifteen miles is about the furthest a truck stop sits from the
+# town it is named after on an interstate exit.
+PROMINENCE_MILES = 15.0
+
+
 
 def normalize(name: str) -> str:
     """Fold a place name to a comparable key."""
@@ -137,7 +143,7 @@ class ResolvedLocation:
 class PlaceIndex:
     """The committed gazetteer, indexed three ways.
 
-    Built once per process. Loading and indexing 27k rows takes about 340 ms,
+    Built once per process. Loading and indexing 31k rows takes about 385 ms,
     which is paid at start-up rather than on the first request.
     """
 
@@ -239,22 +245,31 @@ class PlaceIndex:
 
     # -- reverse lookup ----------------------------------------------------
 
-    def nearest(self, latitude: float, longitude: float) -> Place | None:
-        """The closest populated place, for naming a stop on the route.
+    def nearest(
+        self, latitude: float, longitude: float, prominence_miles: float = PROMINENCE_MILES
+    ) -> Place | None:
+        """The place a driver would write down for a point on the route.
 
-        Searches outward one grid ring at a time and stops at the first ring
-        that yields a candidate, so a stop in open country still gets a name.
+        Not simply the closest one. Strict nearest-neighbour picks whichever
+        hamlet happens to sit nearest the coordinate, so a stop in downtown
+        Chicago comes back as "Cekaga, IL". A driver writes the town anyone
+        would recognise, so among the places within ``prominence_miles`` of
+        the closest match, this returns the largest.
+
+        Searches outward by grid ring, so a rest area in open country still
+        gets a name; out there the window widens with the distance to the
+        first candidate, which is the behaviour that finds the one town for a
+        hundred miles.
         """
         centre = _cell(latitude, longitude)
         cosine = float(np.cos(np.radians(latitude)))
 
-        for ring in range(0, 6):
+        # Start two rings out. One cell alone can hold a hamlet while the city
+        # that names the area sits just over the boundary.
+        for reach in range(1, 6):
             candidates: list[Place] = []
-            for delta_lat in range(-ring, ring + 1):
-                for delta_lon in range(-ring, ring + 1):
-                    # Only the outermost shell is new on each pass.
-                    if ring and max(abs(delta_lat), abs(delta_lon)) != ring:
-                        continue
+            for delta_lat in range(-reach, reach + 1):
+                for delta_lon in range(-reach, reach + 1):
                     candidates.extend(
                         self._grid.get((centre[0] + delta_lat, centre[1] + delta_lon), ())
                     )
@@ -265,7 +280,17 @@ class PlaceIndex:
             latitudes = np.fromiter((p.latitude for p in candidates), dtype=np.float64)
             longitudes = np.fromiter((p.longitude for p in candidates), dtype=np.float64)
             distances = planar_miles(latitude, longitude, latitudes, longitudes, cosine)
-            return candidates[int(np.argmin(distances))]
+
+            closest = float(distances.min())
+            within = np.flatnonzero(distances <= closest + prominence_miles)
+            best = max(
+                within,
+                key=lambda position: (
+                    candidates[position].population,
+                    -distances[position],
+                ),
+            )
+            return candidates[int(best)]
 
         return None
 

@@ -18,6 +18,29 @@ def test_index_covers_the_country(index):
     assert len(index) > 25_000
 
 
+@pytest.mark.parametrize(
+    "code,state", [("CHI", "IL"), ("DFW", "TX"), ("ATL", "GA"), ("BOS", "MA")]
+)
+def test_airport_codes_are_not_treated_as_places(index, code, state):
+    # GeoNames lists these as alternate names of the city, on the city's own
+    # coordinates and carrying its population. Built into the gazetteer they
+    # win the reverse lookup, and a log sheet reads "DFW, TX" where a driver
+    # would have written "Dallas, TX". build_places takes canonical names only.
+    assert index.lookup(code, state) is None
+
+
+@pytest.mark.parametrize(
+    "name,state", [("Chicago", "IL"), ("Dallas", "TX"), ("Atlanta", "GA"), ("Boston", "MA")]
+)
+def test_dropping_the_codes_keeps_the_cities_they_shadowed(index, name, state):
+    assert index.lookup(name, state) is not None
+
+
+def test_transliterated_names_are_not_treated_as_places(index):
+    # "Cekaga" is one of Chicago's alternate names, on identical coordinates.
+    assert index.lookup("Cekaga", "IL") is None
+
+
 # -- resolving -------------------------------------------------------------
 
 
@@ -36,8 +59,11 @@ def test_a_bare_name_resolves_to_the_largest_place_of_that_name(index):
     assert places.resolve("Springfield", index=index).label.endswith(", MO")
 
 
-def test_abbreviations_expand(index):
-    assert places.resolve("St. Louis, MO", index=index).label == "Saint Louis, MO"
+@pytest.mark.parametrize("typed", ["St. Louis, MO", "Saint Louis, MO", "st louis, mo"])
+def test_abbreviations_fold_to_the_same_place(index, typed):
+    # "St" and "Saint" normalise together, so it does not matter which the
+    # driver types or which spelling the gazetteer happens to carry.
+    assert places.resolve(typed, index=index).label == "St. Louis, MO"
 
 
 def test_coordinates_are_accepted_and_named(index):
@@ -91,6 +117,11 @@ def test_the_same_place_is_not_offered_twice(index):
 
 def test_a_coordinate_finds_its_town(index):
     assert index.nearest(39.1200, -88.5434).name == "Effingham"
+
+
+def test_a_city_centre_reverses_to_the_city_not_its_airport_code(index):
+    assert index.nearest(41.8500, -87.6500).label == "Chicago, IL"
+    assert index.nearest(32.7831, -96.8067).label == "Dallas, TX"
 
 
 def test_open_country_still_gets_a_name(index):
