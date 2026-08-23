@@ -3,10 +3,14 @@
 from __future__ import annotations
 
 from django.conf import settings
+from django.shortcuts import get_object_or_404
+from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-from apps.planner import places
+from apps.planner import places, services
+from apps.planner.models import Trip
+from apps.planner.serializers import TripRequestSerializer
 
 
 @api_view(["GET"])
@@ -19,6 +23,8 @@ def service_root(request):
             "endpoints": {
                 "health": "/api/v1/health/",
                 "place_suggestions": "/api/v1/places/suggest/?q=",
+                "plan_a_trip": "POST /api/v1/trips/",
+                "retrieve_a_trip": "/api/v1/trips/{id}/",
             },
         }
     )
@@ -67,3 +73,21 @@ def suggest_places(request):
             ],
         }
     )
+
+
+@api_view(["POST"])
+def plan_trip(request):
+    """Plan a trip and keep it, so the result has a URL that can be shared."""
+    form = TripRequestSerializer(data=request.data)
+    form.is_valid(raise_exception=True)
+    return Response(
+        services.plan_and_store(form.validated_data),
+        status=status.HTTP_201_CREATED,
+    )
+
+
+@api_view(["GET"])
+def retrieve_trip(request, trip_id):
+    """A trip already planned. Reloading a shared link costs no routing call."""
+    trip = get_object_or_404(Trip, pk=trip_id)
+    return Response(trip.plan)
