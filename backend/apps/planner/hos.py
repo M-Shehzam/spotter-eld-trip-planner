@@ -179,7 +179,11 @@ class Segment:
     start: datetime
     end: datetime
     label: str
+    # Where the driver is when the segment begins, which is what the Remarks
+    # column on a log sheet records. For anything but driving the two are the
+    # same, because the truck has not moved.
     location: str
+    end_location: str
     start_mile: float
     end_mile: float
 
@@ -252,9 +256,11 @@ class _Planner:
         start: datetime,
         cycle_used: float,
         locate: Callable[[float], str],
+        origin_label: str = "",
     ) -> None:
         self.rules = rules
         self.locate = locate
+        self.origin_label = origin_label
         self.clock = _Clock(now=start, cycle_used=cycle_used, window_start=start)
         self.segments: list[Segment] = []
         self.start = start
@@ -268,8 +274,8 @@ class _Planner:
         kind: StopKind,
         hours: float,
         label: str,
-        location: str,
         miles: float = 0.0,
+        location: str | None = None,
     ) -> None:
         if hours <= EPSILON:
             return
@@ -279,6 +285,23 @@ class _Planner:
         self.clock.now = began + timedelta(hours=hours)
         self.clock.mile = start_mile + miles
 
+        # A pickup or dropoff carries the name the driver typed, which beats
+        # whatever the gazetteer would return for those coordinates. So does
+        # the origin: someone who enters "Newark, NJ" should not be told their
+        # trip began in New York City because it is the larger place nearby.
+        # Everywhere else is named from where it happens on the route.
+        if location is not None:
+            where = location
+        elif start_mile <= EPSILON and self.origin_label:
+            where = self.origin_label
+        else:
+            where = self.locate(start_mile)
+        ends_at = (
+            location
+            if location is not None
+            else (where if miles <= EPSILON else self.locate(self.clock.mile))
+        )
+
         self.segments.append(
             Segment(
                 status=status,
@@ -286,7 +309,8 @@ class _Planner:
                 start=began,
                 end=self.clock.now,
                 label=label,
-                location=location,
+                location=where,
+                end_location=ends_at,
                 start_mile=start_mile,
                 end_mile=self.clock.mile,
             )
@@ -308,13 +332,11 @@ class _Planner:
 
     def _take_reset(self) -> None:
         """Ten hours off. Restores the driving limit and reopens the window."""
-        where = self.locate(self.clock.mile)
         self._emit(
             DutyStatus.SLEEPER,
             StopKind.REST,
             self.rules.reset_hours,
             f"{self.rules.reset_hours:g}-hour rest",
-            where,
         )
         self.clock.drive_since_reset = 0.0
         self.clock.drive_since_break = 0.0
@@ -322,13 +344,11 @@ class _Planner:
 
     def _take_restart(self) -> None:
         """Thirty-four hours off. The only way to get the cycle back."""
-        where = self.locate(self.clock.mile)
         self._emit(
             DutyStatus.OFF_DUTY,
             StopKind.RESTART,
             self.rules.restart_hours,
             f"{self.rules.restart_hours:g}-hour restart",
-            where,
         )
         self.clock.cycle_used = 0.0
         self.clock.drive_since_reset = 0.0
@@ -336,23 +356,19 @@ class _Planner:
         self.clock.window_start = self.clock.now
 
     def _take_break(self) -> None:
-        where = self.locate(self.clock.mile)
         self._emit(
             DutyStatus.OFF_DUTY,
             StopKind.BREAK,
             self.rules.break_hours,
             f"{self.rules.break_hours * 60:g}-minute break",
-            where,
         )
 
     def _take_fuel(self) -> None:
-        where = self.locate(self.clock.mile)
         self._emit(
             DutyStatus.ON_DUTY,
             StopKind.FUEL,
             self.rules.fuel_stop_hours,
             "Fuel",
-            where,
         )
         self.clock.miles_since_fuel = 0.0
 
@@ -421,7 +437,6 @@ class _Planner:
                 StopKind.DRIVE,
                 chunk,
                 f"Driving to {leg.destination}",
-                leg.destination,
                 miles=chunk * speed,
             )
             remaining -= chunk
@@ -442,7 +457,7 @@ class _Planner:
             task.kind,
             task.hours,
             task.kind.value.capitalize(),
-            task.location,
+            location=task.location,
         )
 
     # -- entry point -------------------------------------------------------
@@ -473,6 +488,7 @@ def plan_trip(
     cycle_used_hours: float,
     rules: Rules | None = None,
     locate: Callable[[float], str] | None = None,
+    origin_label: str = "",
 ) -> Plan:
     """Walk the itinerary forward, inserting every rest the rules require.
 
@@ -486,10 +502,12 @@ def plan_trip(
         rules: Defaults to the regulation as configured in settings.
         locate: Turns a mile marker into a place name for the remarks. A test
             can pass a stub.
+        origin_label: What the driver called the starting point. Used in place
+            of the gazetteer for mile zero.
     """
     rules = rules or Rules.from_settings()
     locate = locate or (lambda mile: "")
-    return _Planner(rules, start, cycle_used_hours, locate).run(activities)
+    return _Planner(rules, start, cycle_used_hours, locate, origin_label).run(activities)
 
 
 def build_itinerary(
