@@ -1,11 +1,170 @@
+@import "@fontsource/fira-sans/300.css";
+@import "@fontsource/fira-sans/400.css";
+@import "@fontsource/fira-sans/500.css";
+@import "@fontsource/fira-sans/600.css";
+@import "@fontsource/fira-sans/700.css";
+@import "@fontsource/fira-code/400.css";
+@import "@fontsource/fira-code/500.css";
+
 :root {
-  color-scheme: dark light;
+  color-scheme: dark;
+  --page: #0b1220;
 }
 
 * {
   box-sizing: border-box;
 }
 
+html,
+body,
+#root {
+  height: 100%;
+}
+
 body {
   margin: 0;
+  background: var(--page);
+  /* A cold light from the top left, so the page is not a flat slab. */
+  background-image: radial-gradient(
+      1100px 620px at 12% -8%,
+      rgba(56, 189, 248, 0.1),
+      transparent 62%
+    ),
+    radial-gradient(880px 520px at 92% 0%, rgba(129, 140, 248, 0.08), transparent 58%);
+  background-attachment: fixed;
+}
+
+/* Numbers in the same column should line up, always. */
+.tabular {
+  font-family: "Fira Code", ui-monospace, SFMono-Regular, monospace;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+/* --- The four motions, defined once ------------------------------------- */
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: scale(0.82);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes shimmer {
+  from {
+    background-position: -420px 0;
+  }
+  to {
+    background-position: 420px 0;
+  }
+}
+
+/* --- Motion preference --------------------------------------------------
+   Handled in one place rather than at each call site, so a component added
+   later cannot forget it. Animations are collapsed to a single frame rather
+   than removed, which keeps every `both`-filled end state applied: an element
+   that animates in still ends up visible. */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* --- Leaflet, brought into the theme ------------------------------------ */
+
+.leaflet-container {
+  background: #0b1220;
+  font-family: "Fira Sans", system-ui, sans-serif;
+}
+
+.leaflet-control-attribution {
+  background: rgba(11, 18, 32, 0.82) !important;
+  color: #7c8ba5 !important;
+  font-size: 10px !important;
+}
+
+.leaflet-control-attribution a {
+  color: #93a4bf !important;
+}
+
+.leaflet-bar a {
+  background: #131c2e !important;
+  color: #e6edf7 !important;
+  border-color: #24324d !important;
+}
+
+.leaflet-bar a:hover {
+  background: #1b2740 !important;
+}
+
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+  background: #1b2740 !important;
+  color: #e6edf7 !important;
+  border-radius: 10px !important;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.5) !important;
+}
+
+.leaflet-popup-content {
+  margin: 10px 13px !important;
+  font-family: "Fira Sans", system-ui, sans-serif !important;
+}
+
+.leaflet-popup-close-button {
+  color: #93a4bf !important;
+}
+
+/* --- Print: the log sheets, and nothing else ---------------------------- */
+
+@media print {
+  body {
+    background: #fff;
+    background-image: none;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .print-sheet {
+    page-break-after: always;
+    break-after: page;
+  }
 }
