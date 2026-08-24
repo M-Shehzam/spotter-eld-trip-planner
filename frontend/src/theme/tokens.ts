@@ -66,3 +66,28 @@ export const SURFACE = {
   warn: "#FBBF24",
   bad: "#FB7185",
 } as const;
+
+/**
+ * The same statuses again, in ink that survives white paper.
+ *
+ * The colours above are tuned for a near-black background and go pale on a
+ * printed sheet. The log sheet is drawn as paper because that is what it is,
+ * so it needs its own set.
+ */
+export const DUTY_INK: Record<DutyStatus, string> = {
+  off_duty: "#475569",
+  sleeper_berth: "#4338CA",
+  driving: "#0369A1",
+  on_duty: "#B45309",
+};
+
+/** The sheet itself. Printed as-is, so the values are print values. */
+export const PAPER = {
+  sheet: "#F8FAFC",
+  ink: "#0F172A",
+  rule: "#334155",
+  hairline: "#94A3B8",
+  strip: "#0F172A",
+  stripInk: "#F8FAFC",
+  filled: "#0F172A",
+} as const;

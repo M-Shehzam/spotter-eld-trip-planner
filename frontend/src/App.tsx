@@ -10,6 +10,7 @@ import { ApiError } from "./api/client";
 import { planTrip } from "./api/trips";
 import { AppHeader } from "./components/AppHeader";
 import { EmptyState } from "./components/EmptyState";
+import { LogSheets } from "./components/LogSheets";
 import { RouteMap } from "./components/RouteMap";
 import { StopsTimeline } from "./components/StopsTimeline";
 import { TripForm } from "./components/TripForm";
@@ -23,13 +24,21 @@ import type { Trip, TripRequest } from "./types/trip";
 function Results({ trip }: { trip: Trip }) {
   return (
     <Stack spacing={3}>
-      <TripSummary trip={trip} />
+      <Box className="no-print">
+        <TripSummary trip={trip} />
+      </Box>
 
-      <Box sx={{ ...riseIn(2) }}>
+      <Box className="no-print" sx={{ ...riseIn(2) }}>
         <RouteMap trip={trip} />
       </Box>
 
+      {/* The sheets are the deliverable the brief names, so they sit above
+          the timeline that explains them. */}
       <Box sx={{ ...riseIn(3) }}>
+        <LogSheets trip={trip} />
+      </Box>
+
+      <Box className="no-print" sx={{ ...riseIn(4) }}>
         <StopsTimeline trip={trip} />
       </Box>
     </Stack>

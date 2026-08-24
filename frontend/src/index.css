@@ -153,6 +153,11 @@ body {
 
 /* --- Print: the log sheets, and nothing else ---------------------------- */
 
+/* Screen shows the day you picked. Print takes every day. */
+.print-only {
+  display: none;
+}
+
 @media print {
   body {
     background: #fff;
@@ -163,8 +168,27 @@ body {
     display: none !important;
   }
 
+  .print-only {
+    display: block;
+  }
+
+  /* On paper the sheet is the page: no card, no shadow, no minimum width
+     forcing it off the edge. */
   .print-sheet {
     page-break-after: always;
     break-after: page;
+    min-width: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
   }
+
+  .print-sheet:last-child {
+    page-break-after: auto;
+    break-after: auto;
+  }
+}
+
+@page {
+  size: landscape;
+  margin: 10mm;
 }
