@@ -1,0 +1,24 @@
+# Render's free tier stops an instance after fifteen idle minutes, and waking
+# it takes about a minute. A reviewer opening the hosted link should not spend
+# that minute watching a spinner, so this pings the health endpoint often
+# enough to keep the instance up.
+#
+# 750 free instance hours a month covers 720 hours of always-on, so this stays
+# inside the plan.
+
+name: Keep the API warm
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping the health endpoint
+        run: |
+          curl --silent --show-error --fail --max-time 90 \
+            "${{ vars.API_BASE_URL }}/api/v1/health/" \
+            || echo "The API did not answer. It will wake on the next request."
