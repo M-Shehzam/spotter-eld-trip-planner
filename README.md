@@ -5,7 +5,7 @@ much of the 70-hour cycle is already spent. Get back a route with every stop
 the federal rules require, and a drawn daily log sheet for each day of the
 trip.
 
-Built for the Spotter AI full-stack assessment.
+Built by Muhammad Shehzam for the Spotter AI full-stack assessment.
 
 | | |
 | --- | --- |
@@ -159,3 +159,11 @@ the Render URL.
 
 Render stops a free instance after fifteen idle minutes, so a scheduled
 workflow pings the health endpoint every ten.
+
+## Author
+
+Muhammad Shehzam
+[github.com/M-Shehzam](https://github.com/M-Shehzam) &middot;
+m.shehzamtariq@gmail.com
+
+Licensed under the MIT License. See `LICENSE`.

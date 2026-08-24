@@ -9,5 +9,11 @@
   "devDependencies": {
     "axe-core": "^4.10.2",
     "playwright": "^1.61.1"
+  },
+  "author": "Muhammad Shehzam <m.shehzamtariq@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/M-Shehzam/spotter-eld-trip-planner"
   }
 }

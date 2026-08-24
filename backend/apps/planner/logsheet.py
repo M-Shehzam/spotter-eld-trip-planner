@@ -41,8 +41,8 @@ HOURS_PER_DAY = 24.0
 # and what it was, not the internal name of the event.
 REMARK_WORDING = {
     StopKind.DRIVE: "Driving",
-    StopKind.PICKUP: "Pickup — loading",
-    StopKind.DROPOFF: "Dropoff — unloading",
+    StopKind.PICKUP: "Pickup, loading",
+    StopKind.DROPOFF: "Dropoff, unloading",
     StopKind.FUEL: "Fuel stop",
     StopKind.BREAK: "30-minute break",
     StopKind.REST: "10-hour rest",

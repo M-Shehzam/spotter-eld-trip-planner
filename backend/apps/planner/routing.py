@@ -2,8 +2,9 @@
 
 The whole trip is one request: current location, then pickup, then dropoff.
 The provider answers with the full geometry and a per-leg breakdown, and
-everything downstream — where the fuel stop lands, where the driver parks for
-ten hours, what town to write in the remarks — is computed locally from that
+everything downstream is computed locally from that: where the fuel stop
+lands, where the driver parks for ten hours, what town goes in the remarks,
+all from
 single response.
 
 That matters because the planner needs a coordinate for roughly a dozen stops

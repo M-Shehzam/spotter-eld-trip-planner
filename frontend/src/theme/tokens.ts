@@ -1,9 +1,9 @@
 /**
  * Colours that mean something.
  *
- * The duty statuses and the stop kinds appear in four places — the map
- * markers, the timeline, the log sheet grid, and the summary — and they have
- * to agree everywhere. A driver who learns that amber is on-duty on the log
+ * The duty statuses and the stop kinds appear in four places: the map
+ * markers, the timeline, the log sheet grid, and the summary. They have to
+ * agree everywhere. A driver who learns that amber is on-duty on the log
  * should see the same amber on the map. They live here rather than in the MUI
  * palette because the log sheet is drawn as SVG and never touches a theme.
  */
@@ -11,10 +11,10 @@
 import type { DutyStatus, StopKind } from "../types/trip";
 
 export const DUTY_COLOURS: Record<DutyStatus, string> = {
-  off_duty: "#94A3B8", // slate — not working
-  sleeper_berth: "#818CF8", // indigo — in the bunk
-  driving: "#38BDF8", // sky — the accent, because this is the point
-  on_duty: "#FBBF24", // amber — working, not driving
+  off_duty: "#94A3B8", // slate, not working
+  sleeper_berth: "#818CF8", // indigo, in the bunk
+  driving: "#38BDF8", // sky, the accent, because this is the point
+  on_duty: "#FBBF24", // amber, working but not driving
 };
 
 export const DUTY_LABELS: Record<DutyStatus, string> = {
@@ -35,8 +35,8 @@ export const DUTY_ROWS: DutyStatus[] = [
 export const STOP_COLOURS: Record<StopKind, string> = {
   start: "#E2E8F0",
   drive: "#38BDF8",
-  pickup: "#34D399", // emerald — cargo on
-  dropoff: "#FB7185", // rose — cargo off
+  pickup: "#34D399", // emerald, cargo on
+  dropoff: "#FB7185", // rose, cargo off
   fuel: "#FBBF24",
   break: "#94A3B8",
   rest: "#818CF8",

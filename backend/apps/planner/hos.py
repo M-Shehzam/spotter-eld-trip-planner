@@ -1,7 +1,7 @@
 """Hours-of-service planning for a property-carrying driver.
 
-This is the part of the app that has to be right. It takes an itinerary —
-drive, load, drive, unload — and walks a clock forward through it, inserting
+This is the part of the app that has to be right. It takes an itinerary of
+drives and stops, then walks a clock forward through it, inserting
 the breaks and rests that 49 CFR 395.3 requires, until the whole trip is
 accounted for. What comes out is a flat list of duty segments covering every
 minute from departure to delivery, which is exactly what a log sheet draws.

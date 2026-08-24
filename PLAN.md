@@ -1,4 +1,4 @@
-# Spotter AI — ELD Trip Planner: Build Plan
+# Spotter AI ELD Trip Planner: Build Plan
 
 Assessment: build a Django + React app that takes trip details and returns route
 instructions plus filled-in driver daily log sheets.
@@ -143,7 +143,7 @@ those fields and leaving them blank looks unfinished.
       "from_label": "Chicago, IL", "to_label": "Effingham, IL",
       "total_miles_driving": 512, "total_mileage": 512,
       "grid": [{"status": "off_duty", "start_hour": 0.0, "end_hour": 6.0}, ...],
-      "remarks": [{"hour": 6.0, "text": "Chicago, IL — begin trip"}],
+      "remarks": [{"hour": 6.0, "text": "Chicago, IL, begin trip"}],
       "totals": {"off_duty": 8.0, "sleeper": 0.0, "driving": 11.0, "on_duty": 5.0},
       "recap": {"on_duty_today": 16.0, "on_duty_last_7": 30.5,
                 "available_tomorrow": 39.5, "on_duty_last_8": 30.5}
@@ -172,7 +172,7 @@ from cache keyed on a hash of the inputs.
 
 ## 4. Routing
 
-1. Resolve the three place strings against `PlaceIndex` — no network call.
+1. Resolve the three place strings against `PlaceIndex`, with no network call.
 2. One OSRM request: `current → pickup → dropoff`, `overview=full`,
    `geometries=polyline`. Returns the full geometry and per-leg distance and
    duration.
@@ -186,7 +186,7 @@ from cache keyed on a hash of the inputs.
 
 ---
 
-## 5. HOS engine — the part that gets graded
+## 5. HOS engine, the part that gets graded
 
 Pure Python, no Django imports, no I/O. A forward simulation over a timeline.
 
@@ -194,7 +194,7 @@ Pure Python, no Django imports, no I/O. A forward simulation over a timeline.
 
 | Field | Resets on |
 |---|---|
-| `clock` | — |
+| `clock` | none |
 | `drive_since_reset` (11-hr limit) | 10 consecutive hrs off duty or sleeper |
 | `window_start` (14-hr window) | 10 consecutive hrs off duty or sleeper |
 | `drive_since_break` (8-hr limit) | any ≥30 min in a non-driving status |
@@ -205,17 +205,17 @@ Pure Python, no Django imports, no I/O. A forward simulation over a timeline.
 
 ### Rules implemented (49 CFR 395.3)
 
-1. **11-hour driving limit** — no more than 11 hrs driving after 10 consecutive
+1. **11-hour driving limit.** No more than 11 hrs driving after 10 consecutive
    hrs off duty.
-2. **14-hour window** — no driving beyond the 14th hour after coming on duty.
+2. **14-hour window.** No driving beyond the 14th hour after coming on duty.
    Off-duty time inside the window does not extend it.
-3. **30-minute break** — required after 8 cumulative hrs of driving. Satisfied by
+3. **30-minute break.** Required after 8 cumulative hrs of driving. Satisfied by
    30 consecutive minutes in *any* non-driving status, per the 2020 final rule.
    This matters: the 1-hour pickup is on-duty-not-driving, so it clears the break
    requirement on its own. Getting that right is the detail that separates a real
    implementation from a guess.
-4. **70-hour / 8-day cycle** — no driving once 70 on-duty hours accumulate.
-5. **34-hour restart** — 34 consecutive hrs off duty zeroes the cycle. Only
+4. **70-hour / 8-day cycle.** No driving once 70 on-duty hours accumulate.
+5. **34-hour restart.** 34 consecutive hrs off duty zeroes the cycle. Only
    inserted when the cycle is the binding constraint, because it costs a day and
    a half.
 
@@ -250,7 +250,7 @@ for activity in [DRIVE(leg0), ON_DUTY(1h, pickup), DRIVE(leg1), ON_DUTY(1h, drop
             advance all counters
 
             if miles_since_fuel >= 1000:
-                emit ON_DUTY 0.5h "Fuel — {nearest place}"
+                emit ON_DUTY 0.5h "Fuel at {nearest place}"
 
     if activity is ON_DUTY:
         if 14 - hours_since(window_start) < duration or 70 - cycle_used < duration:
@@ -307,7 +307,7 @@ terminal timezone.
 ## 7. Frontend
 
 React 18 + Vite + TypeScript + MUI v5. Leaflet through `react-leaflet`, with
-CARTO Voyager tiles — free, no key, and better looking than raw OSM.
+CARTO Voyager tiles: free, no key, and better looking than raw OSM.
 
 | Component | Job |
 |---|---|
@@ -315,7 +315,7 @@ CARTO Voyager tiles — free, no key, and better looking than raw OSM.
 | `TripSummary` | Stat cards: distance, driving time, days, arrival, HOS status |
 | `RouteMap` | Polyline, numbered stop markers colour-coded by type, popups, fit-to-bounds |
 | `StopsTimeline` | Vertical MUI timeline of every stop and rest with times |
-| `LogSheetGrid` | The SVG replica — one per day |
+| `LogSheetGrid` | The SVG replica, one per day |
 | `LogSheetTabs` | Day-by-day navigation, download PNG, print all |
 
 Design intent: dark-first theme with a single accent, generous spacing, the map

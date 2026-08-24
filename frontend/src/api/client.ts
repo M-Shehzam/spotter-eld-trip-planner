@@ -67,7 +67,7 @@ async function request<T>(path: string, init: RequestInit, options: RequestOptio
     if (error instanceof DOMException && error.name === "AbortError") {
       throw new ApiError(0, {
         code: "timeout",
-        message: "The request took too long. The server may be starting up — try again.",
+        message: "The request took too long. The server may be starting up. Try again.",
       });
     }
     throw new ApiError(0, {
