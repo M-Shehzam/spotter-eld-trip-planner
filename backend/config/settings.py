@@ -60,11 +60,23 @@ INSTALLED_APPS = [
     "apps.planner",
 ]
 
+# Four, in this order. Security sets the headers, WhiteNoise answers for the
+# static files before anything else looks at the path, CORS has to run before
+# Common so that a preflight gets its headers, and Common finishes the job.
+#
+# Two that Django's deployment check asks for are left out on purpose:
+#
+# - `CsrfViewMiddleware`. This API carries no cookies and no session. It
+#   authenticates nothing, so there is no ambient authority for a forged
+#   request to borrow, and turning it on would reject every POST the frontend
+#   makes from its own origin.
+# - `SessionMiddleware`, for the same reason.
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -213,3 +225,10 @@ if not DEBUG:
     SECURE_HSTS_SECONDS = env_int("SECURE_HSTS_SECONDS", 60 * 60 * 24 * 30)
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
+    # Deny framing outright. The only HTML this serves is the one-paragraph
+    # service description at the root.
+    X_FRAME_OPTIONS = "DENY"
+    # HSTS preload is left off. Getting on the list is easy and getting off it
+    # takes months, which is the wrong trade for a demo on a subdomain that
+    # someone else owns.
+    SECURE_HSTS_PRELOAD = False

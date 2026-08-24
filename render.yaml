@@ -1,0 +1,37 @@
+# Render blueprint for the planner API.
+#
+# The frontend deploys to Vercel and talks to this over CORS, so the two
+# origins are configured against each other rather than proxied. Free tier
+# means one instance, 512 MB, and a cold start after fifteen idle minutes,
+# which the frontend warns about while a first request runs.
+
+services:
+  - type: web
+    name: spotter-eld-api
+    runtime: python
+    plan: free
+    region: oregon
+    rootDir: backend
+    buildCommand: ./build.sh
+    # One worker, because each one loads its own copy of the 31,000-place
+    # gazetteer. Threads carry the concurrency instead, and every slow part of
+    # a request is a network wait on the routing service.
+    startCommand: gunicorn config.wsgi:application --workers 1 --threads 8 --timeout 120
+    healthCheckPath: /api/v1/health/
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.7"
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "false"
+      - key: ALLOWED_HOSTS
+        value: ".onrender.com"
+      # Vercel gives every deployment its own subdomain, so the preview URLs
+      # have to match as well as the production one.
+      - key: CORS_ALLOWED_ORIGIN_REGEXES
+        value: "^https://[a-z0-9-]+\\.vercel\\.app$"
+      - key: TRUCK_SPEED_FACTOR
+        value: "1.0"
+      - key: WEB_CONCURRENCY
+        value: "1"
