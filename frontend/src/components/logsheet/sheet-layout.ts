@@ -14,7 +14,7 @@
 
 import type { GridEntry, LogRemark } from "../../types/trip";
 
-export const SHEET = { width: 1010, height: 742, margin: 24 } as const;
+export const SHEET = { width: 1010, height: 780, margin: 24 } as const;
 
 export const GRID = {
   x0: 132,

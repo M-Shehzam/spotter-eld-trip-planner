@@ -514,7 +514,7 @@ function Remarks({ sheet }: { sheet: LogSheet }) {
   );
 }
 
-function ShippingAndInstructions() {
+function ShippingAndInstructions({ inputs }: { inputs: TripInputs }) {
   const top = REMARKS.top + REMARKS.height + 12;
 
   return (
@@ -557,6 +557,17 @@ function ShippingAndInstructions() {
       <T x={640} y={top + 64} size={8.5} anchor="middle" weight={600}>
         Use time standard of home terminal.
       </T>
+
+      {/* The driver signs the sheet. The form is a certification, not a
+          report, and the optional name the trip form collects belongs here
+          rather than nowhere. */}
+      <Field
+        x={SHEET.margin}
+        y={top + 104}
+        width={316}
+        label="Driver's signature (in full)"
+        value={inputs.driver_name}
+      />
     </g>
   );
 }
@@ -699,7 +710,7 @@ export function LogSheetSvg({
       <Grid sheet={sheet} />
       <DutyLine sheet={sheet} animate={animate} />
       <Remarks sheet={sheet} />
-      <ShippingAndInstructions />
+      <ShippingAndInstructions inputs={inputs} />
       <Recap sheet={sheet} />
     </svg>
   );

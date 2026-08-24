@@ -15,7 +15,7 @@ import Slider from "@mui/material/Slider";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import type { TripRequest } from "../types/trip";
 import { riseIn } from "../theme/motion";
@@ -50,6 +50,7 @@ export function TripForm({ onSubmit, busy, errorMessage, fieldErrors }: Props) {
   const [carrier, setCarrier] = useState("");
   const [truck, setTruck] = useState("");
   const [touched, setTouched] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
 
   const missing = {
     current_location: !current.trim(),
@@ -66,7 +67,17 @@ export function TripForm({ onSubmit, busy, errorMessage, fieldErrors }: Props) {
   function submit(event: React.FormEvent) {
     event.preventDefault();
     setTouched(true);
-    if (incomplete || busy) return;
+
+    if (incomplete || busy) {
+      // The fields only mark themselves invalid on the next render, so the
+      // focus move waits a frame. Landing on the first thing that needs
+      // fixing beats leaving a keyboard user at the submit button with an
+      // error they cannot see.
+      requestAnimationFrame(() => {
+        formRef.current?.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus();
+      });
+      return;
+    }
 
     onSubmit({
       current_location: current.trim(),
@@ -92,7 +103,12 @@ export function TripForm({ onSubmit, busy, errorMessage, fieldErrors }: Props) {
   return (
     <Paper
       component="form"
+      ref={formRef}
       onSubmit={submit}
+      // The browser's own bubble is unstyled, vanishes on the next click and
+      // stops this handler from ever running, which left the form's inline
+      // messages dead code. The fields keep `required` for semantics.
+      noValidate
       elevation={0}
       sx={{ p: { xs: 2.5, sm: 3.5 }, borderRadius: 3, ...riseIn(0) }}
     >
