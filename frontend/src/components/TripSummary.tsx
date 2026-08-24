@@ -213,7 +213,14 @@ export function TripSummary({ trip }: { trip: Trip }) {
             value={summary.cycle_hours_available.toFixed(1)}
             unit="h"
             accent={summary.cycle_hours_available < 11 ? SURFACE.warn : undefined}
-            note={`${summary.cycle_hours_at_finish.toFixed(1)} h used of 70`}
+            // A 34-hour restart wipes the cycle, so the figure at arrival can
+            // sit below the one the driver started with. Saying which end of
+            // the trip this counts stops that reading as a contradiction.
+            note={
+              summary.restarts > 0
+                ? `${summary.cycle_hours_at_finish.toFixed(1)} h used at arrival, after the restart`
+                : `${summary.cycle_hours_at_finish.toFixed(1)} h used of 70 at arrival`
+            }
           />
         </Box>
       </Tooltip>

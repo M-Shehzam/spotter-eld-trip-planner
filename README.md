@@ -9,8 +9,8 @@ Built for the Spotter AI full-stack assessment.
 
 | | |
 | --- | --- |
-| Live app | https://TODO.vercel.app |
-| API | https://TODO.onrender.com |
+| Live app | https://spotter-eld-trip-planner-sepia.vercel.app |
+| API | https://spotter-eld-api-ok80.onrender.com |
 | Walkthrough | https://TODO.loom.com |
 
 ---

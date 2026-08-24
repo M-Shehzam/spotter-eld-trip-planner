@@ -86,6 +86,9 @@ export default function App() {
   const [waking, setWaking] = useState(false);
   const [error, setError] = useState<ApiError | null>(null);
   const lastRequest = useRef<TripRequest | null>(null);
+  // Set only when a plan arrives from a shared link, so the form can show
+  // what produced it. A plan the user just submitted needs no restoring.
+  const [restored, setRestored] = useState<Trip | null>(null);
 
   const run = useCallback(async (request: TripRequest) => {
     lastRequest.current = request;
@@ -129,7 +132,10 @@ export default function App() {
     setBusy(true);
     getTrip(id, () => setWaking(true))
       .then((found) => {
-        if (live) setTrip(found);
+        if (live) {
+          setTrip(found);
+          setRestored(found);
+        }
       })
       .catch(() => {
         // A stale or unknown id is not worth an error panel. The form is
@@ -204,6 +210,8 @@ export default function App() {
                 that failed outright is reported once, in the results panel,
                 rather than twice in two different shapes. */}
             <TripForm
+              key={restored?.id ?? "blank"}
+              initial={restored?.inputs}
               onSubmit={run}
               busy={busy}
               errorMessage={fieldErrors ? (error?.message ?? null) : null}

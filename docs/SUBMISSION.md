@@ -5,7 +5,7 @@ Three links go into the Teamtailor form on Ena's message.
 | Field | Link |
 | --- | --- |
 | GitHub code | https://github.com/M-Shehzam/spotter-eld-trip-planner |
-| Hosted version | https://TODO.vercel.app |
+| Hosted version | https://spotter-eld-trip-planner-sepia.vercel.app |
 | Loom video | https://TODO.loom.com |
 
 ## Before submitting

@@ -17,7 +17,7 @@ import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import { useRef, useState } from "react";
 
-import type { TripRequest } from "../types/trip";
+import type { TripInputs, TripRequest } from "../types/trip";
 import { riseIn } from "../theme/motion";
 import { SURFACE } from "../theme/tokens";
 
@@ -38,17 +38,26 @@ interface Props {
   busy: boolean;
   errorMessage?: string | null;
   fieldErrors?: Record<string, string[]>;
+  /**
+   * What a shared link was planned with.
+   *
+   * Opening `?trip=<id>` used to restore the results and leave the form
+   * blank, so the page showed a six-day trip beside three placeholders and a
+   * cycle of zero. The person who opened the link could not see what produced
+   * it, let alone change one field and replan.
+   */
+  initial?: TripInputs | null;
 }
 
-export function TripForm({ onSubmit, busy, errorMessage, fieldErrors }: Props) {
-  const [current, setCurrent] = useState("");
-  const [pickup, setPickup] = useState("");
-  const [dropoff, setDropoff] = useState("");
-  const [cycleHours, setCycleHours] = useState(0);
+export function TripForm({ onSubmit, busy, errorMessage, fieldErrors, initial }: Props) {
+  const [current, setCurrent] = useState(initial?.current_location.query ?? "");
+  const [pickup, setPickup] = useState(initial?.pickup_location.query ?? "");
+  const [dropoff, setDropoff] = useState(initial?.dropoff_location.query ?? "");
+  const [cycleHours, setCycleHours] = useState(initial?.current_cycle_used_hours ?? 0);
   const [showDetails, setShowDetails] = useState(false);
-  const [driver, setDriver] = useState("");
-  const [carrier, setCarrier] = useState("");
-  const [truck, setTruck] = useState("");
+  const [driver, setDriver] = useState(initial?.driver_name ?? "");
+  const [carrier, setCarrier] = useState(initial?.carrier_name ?? "");
+  const [truck, setTruck] = useState(initial?.truck_number ?? "");
   const [touched, setTouched] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
 
