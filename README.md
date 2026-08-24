@@ -140,10 +140,16 @@ The backend suite covers the hours-of-service rules case by case: the 11-hour
 limit, the 14-hour window, the break that the pickup satisfies, the 34-hour
 restart, day boundaries at midnight, and plans that the audit should reject.
 
-A Playwright suite drives the running app through 28 checks: validation,
+```bash
+cd e2e && npm run setup && npm test    # 28 checks against the hosted app
+```
+
+The end to end suite drives the deployed app in a real browser: validation,
 keyboard order, a real plan, 24 hours accounted on every sheet, sheet mileage
-against route distance, deep links, PNG export, print output, four viewport
-widths, an axe WCAG 2.1 AA audit, reduced motion, and a mocked failure.
+against route distance, shared links, PNG export, print output, four viewport
+widths, an axe WCAG 2.1 AA audit, reduced motion, and a mocked failure. It
+runs against the hosted URLs rather than a local server, because that is what
+the assessment is graded on. See `e2e/README.md`.
 
 ## Deploying
 
