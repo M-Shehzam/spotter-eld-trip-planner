@@ -1,16 +1,22 @@
-# Render's free tier stops an instance after fifteen idle minutes, and waking
-# it takes about a minute. A reviewer opening the hosted link should not spend
-# that minute watching a spinner, so this pings the health endpoint often
-# enough to keep the instance up.
+# Render stops a free instance after fifteen idle minutes and takes about a
+# minute to wake it. A reviewer opening the hosted link should not spend that
+# minute on a spinner, so this pings the health endpoint to hold it awake.
 #
-# 750 free instance hours a month covers 720 hours of always-on, so this stays
-# inside the plan.
+# The window is deliberate. A free workspace gets 750 instance hours a month
+# and a spun-down service consumes none of them. Pinging around the clock
+# would burn 744 hours in a 31-day month, which leaves no room for build
+# minutes and, on an account with a card on file, turns an overage into a
+# charge rather than a pause.
+#
+# 12:00 to 04:00 UTC covers US working hours and the evening in Pakistan.
+# Sixteen hours a day comes to about 496 hours a month, so the margin is
+# roughly 250 hours.
 
 name: Keep the API warm
 
 on:
   schedule:
-    - cron: "*/10 * * * *"
+    - cron: "*/10 12-23,0-3 * * *"
   workflow_dispatch:
 
 jobs:
